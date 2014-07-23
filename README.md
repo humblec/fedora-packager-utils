@@ -1,7 +1,7 @@
-As of now, this binary is ONLY compatible with scratch built packages. 
+As of now, "koji_downloader.py" is ONLY compatible with koji scratch builds.
 
 ```
-[root@localhost github]# python koji_downloader.py --help
+[github]# python koji_downloader.py --help
 Usage: koji_downloader.py [options]
 
 Options:
@@ -9,7 +9,6 @@ Options:
   -p, --pull    Pull packages from koji repo based on the taskid?
   -l, --list    List packages in specified directory
   -v, --verify  Verify  packages in specified directory
-[root@localhost github]# 
 
 ```
 
