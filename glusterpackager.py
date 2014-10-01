@@ -106,8 +106,6 @@ def spread_packages (sourcedir, destdir):
             destination_file = destdir+'/'+distribution+'/'+a
             os.system("cp"+" " +source_file+" "+destination_file)
 
-            # Now keep fc folders in Fedora and 'el' folders in EPEL
-
         except:
             raise
 
@@ -137,7 +135,6 @@ def pull_packages(sourcedir):
         pullcmd = 'wget -e robots=off --cut-dirs=4 --user-agent=Mozilla/5.0 --reject="index.html*" --reject="*.log" ' \
               '--no-parent --recursive --relative --level=1 --no-directories ' \
               'https://kojipkgs.fedoraproject.org//work/tasks/'+parent_dir+'/'+task_id+'/'
-        #print pullcmd
         ret = os.system(pullcmd)
         if ret:
 
