@@ -49,6 +49,24 @@ def list_rpms(sourcedir):
     print "\t \t %s packages exist in this dir" %(number)
     verify_rpms(sourcedir,pack_list)
 
+def post_spread(where):
+
+    fedora_base = where+'/'+"Fedora"
+    epel_base = where+"/"+"EPEL"
+    if not os.path.exists(fedora_base):
+        os.makedirs(fedora_base)
+    if not os.path.exists(epel_base):
+        os.makedirs(epel_base)
+
+    for dirs in os.listdir(where):
+        #print dirs
+        cmd = "--backup --suffix \"-`date +\"%F-%T\"`\""
+        if "fc" in dirs:
+            print "Fedora:%s" %(dirs)
+            os.system("mv"+ " "+"fc*"+" "+fedora_base+" "+cmd)
+        if "el" in dirs:
+            print "EPEL:%s" %(dirs)
+            os.system("mv"+ " "+"el*"+" "+epel_base+" "+cmd)
 
 def tree_it (which_dir):
 
@@ -68,10 +86,7 @@ def spread_packages (sourcedir, destdir):
             print "Fedora rpm --> %s %s %s %s %s" %(n, v, r, e, a)
         if 'el' in distribution:
             print "EPEL package --> %s %s %s %s %s" %(n, v, r, e, a)
-        if not os.path.exists(destdir+'/'+"Fedora"):
-            os.makedirs(destdir+"/"+"Fedora")
-        if not os.path.exists(destdir+"/"+"EPEL"):
-            os.makedirs(destdir+"/"+"EPEL")
+
 
         try:
             if not os.path.exists(destdir+'/'+distribution+'/'+a):
@@ -87,15 +102,7 @@ def spread_packages (sourcedir, destdir):
         except:
             raise
 
-    for dirs in os.listdir(destdir):
-        #print dirs
-        cmd = "--backup --suffix \"-`date +\"%F-%T\"`\""
-        if "fc" in dirs:
-            print "Fedora:%s" %(dirs)
-            os.system("mv"+ " "+"fc*"+" "+"Fedora"+" "+cmd)
-        if "el" in dirs:
-            print "EPEL:%s" %(dirs)
-            os.system("mv"+ " "+"el*"+" "+"EPEL"+" "+cmd)
+    post_spread(destdir)
 
 #TODO : Make automatic verification of rpms here.
 
