@@ -172,10 +172,10 @@ def main():
 
     if options.spread:
         print "action: spread"
-        #source_spread_dir = raw_input("Enter the source directory where the rpms are stored.:")
-        source_spread_dir='/home/hchiramm/gluster_package_backup'
-        #dest_spread_dir = raw_input("Enter the destination directory where the rpms are stored.:")
-        dest_spread_dir='./'
+        source_spread_dir = raw_input("Enter the source directory where the rpms are stored.:")
+        #source_spread_dir='/home/hchiramm/gluster_package_backup'
+        dest_spread_dir = raw_input("Enter the destination directory where the rpms are stored.:")
+        #dest_spread_dir='./'
         spread_packages(source_spread_dir, dest_spread_dir)
 
 
