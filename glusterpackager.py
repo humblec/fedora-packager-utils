@@ -69,18 +69,29 @@ def post_spread(where):
             os.system("mv"+ " "+"el*"+" "+epel_base+" "+cmd)
 
 def tree_it (which_dir):
+    """
 
+    :param which_dir: The directory on which tree command should be executed
+    :return:
+    """
     os.system("tree"+" "+which_dir)
 
 def spread_packages (sourcedir, destdir):
+
+    """
+
+    :param sourcedir: The directory on which all the downloaded rpms are stored.
+    :param destdir  : The directory in which the packages will  be kept based on fedora and epel version
+    :return:
+    """
     number = 0
     orig_path=sourcedir+'/'+'*.rpm'
     pack_list = glob.glob(orig_path)
     for pck in pack_list:
         number +=1
-       # print pck
+
         (n, v, r, e, a) = splitFilename(pck)
-        #print (n, v, r, e, a)
+
         distribution =  r.split('.')[-1]
         if "fc" in distribution:
             print "Fedora rpm --> %s %s %s %s %s" %(n, v, r, e, a)
@@ -93,8 +104,6 @@ def spread_packages (sourcedir, destdir):
                 os.makedirs(destdir+'/'+distribution+'/'+a)
             source_file = pck
             destination_file = destdir+'/'+distribution+'/'+a
-            #print source_file
-            #print destination_file
             os.system("cp"+" " +source_file+" "+destination_file)
 
             # Now keep fc folders in Fedora and 'el' folders in EPEL
@@ -107,7 +116,7 @@ def spread_packages (sourcedir, destdir):
 #TODO : Make automatic verification of rpms here.
 
     print " ******* VERIFY YOURSELF... I AM LISTING PACKAGES FOR U!! ********"
-    #print destdir
+
     tree_it(destdir)
     print "\t \t %s packages exist in this dir" %(number)
 
@@ -173,9 +182,9 @@ def main():
     if options.spread:
         print "action: spread"
         source_spread_dir = raw_input("Enter the source directory where the rpms are stored.:")
-        #source_spread_dir='/home/hchiramm/gluster_package_backup'
+   
         dest_spread_dir = raw_input("Enter the destination directory where the rpms are stored.:")
-        #dest_spread_dir='./'
+
         spread_packages(source_spread_dir, dest_spread_dir)
 
 
