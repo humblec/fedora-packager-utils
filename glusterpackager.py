@@ -36,6 +36,10 @@ from optparse import OptionParser
 from rpmUtils.miscutils import splitFilename
 
 
+fedora_dirs = ['fedora-19', 'fedora-20', 'fedora-21','fedora-22','fedora-23']
+epel_dirs = ['epel-5','epel-6','epel-7']
+fedoradir=''
+epeldir=''
 
 def verify_rpms(destdir, packages, pkgcount):
 
@@ -82,7 +86,84 @@ def list_rpms(sourcedir):
     verify_rpms(sourcedir,pack_list, number)
     return True
 
+def rearrange_packages(source_rearrange_fedoradir, source_rearrange_epeldir):
+    #os.chdir(source_rearrange_dir)
+    #for dirs in os.listdir(source_rearrange_dir):
+#	print dirs 
+#	if dirs == "EPEL.repo":
+#		source_rearrange_epeldir = source_rearrange_dir+'/'+'EPEL.repo'
+#	if dirs == "Fedora":
+#		source_rearrange_fedoradir = source_rearrange_dir+'/'+'Fedora'
+    os.chdir(source_rearrange_epeldir)
+    for dirs in os.listdir(source_rearrange_epeldir):
+	if dirs == "el5":
+		os.system("mv"+" "+"el5"+" "+ "epel-5")
+	if dirs == "el6":
+		os.system("mv"+" "+"el6"+" "+ "epel-6")
+	if dirs == "el7":
+		os.system("mv"+" "+"el7"+" "+ "epel-7")
+    os.chdir(source_rearrange_fedoradir)
 
+
+    for dirs in os.listdir(source_rearrange_fedoradir):
+	if dirs == "fc19":
+		os.system("mv"+" "+"fc19"+" "+ "fedora-19")
+	if dirs == "fc20":
+		os.system("mv"+" "+"fc20"+" "+ "fedora-20")
+	if dirs == "fc21":
+		os.system("mv"+" "+"fc21"+" "+ "fedora-21")
+	if dirs == "fc22":
+		os.system("mv"+" "+"fc22"+" "+ "fedora-22")
+	if dirs == "fc23":
+		os.system("mv"+" "+"fc23"+" "+ "fedora-23")
+    print source_rearrange_fedoradir
+    for i in fedora_dirs:
+	os.system("mv"+" "+i+"/src"+" "+i+"/SRPMS")
+
+    os.chdir(source_rearrange_epeldir)
+    for i in epel_dirs:
+	os.system("mv"+" "+i+"/src"+" "+i+"/SRPMS")
+
+
+    fedoradir=source_rearrange_fedoradir
+    epeldir=source_rearrange_epeldir
+    rpm_signing(fedoradir,epeldir)
+
+def rpm_signing(fedoradir, epeldir):
+    os.chdir(fedoradir)
+    os.system("rpmsign"+" "+"--addsign"+" "+"*/*/*.rpm")
+    print "Fedora RPMS signed properly"
+    os.chdir(epeldir)
+    os.system("rpmsign"+" "+"--addsign"+" "+"epel-[67]/*/*.rpm") 
+    print "EPEL RPMS signed properly"
+
+
+def link_creation(fedoradir, epeldir):
+    os.chdir(epeldir)
+    for k in epel_dirs:
+	if k == "epel-5":
+		os.system("ln"+" "+"-s"+" "+"epel-5/"+" "+"epel-5Client")    		
+		os.system("ln"+" "+"-s"+" "+"epel-5/"+" "+"epel-5Server")    		
+		os.system("ln"+" "+"-s"+" "+"epel-5/"+" "+"epel-5Workstation")    		
+		os.system("ln"+" "+"-s"+" "+"epel-5/"+" "+"epel-5.9")    		
+		os.system("ln"+" "+"-s"+" "+"epel-5/"+" "+"epel-5.10")    		
+		os.system("ln"+" "+"-s"+" "+"epel-5/"+" "+"epel-5.11")    		
+	if k == "epel-6":
+		os.system("ln"+" "+"-s"+" "+"epel-6/"+" "+"epel-6Client")    		
+		os.system("ln"+" "+"-s"+" "+"epel-6/"+" "+"epel-6Server")    		
+		os.system("ln"+" "+"-s"+" "+"epel-6/"+" "+"epel-6Workstation")    		
+		os.system("ln"+" "+"-s"+" "+"epel-6/"+" "+"epel-6.1")    		
+		os.system("ln"+" "+"-s"+" "+"epel-6/"+" "+"epel-6.2")    		
+		os.system("ln"+" "+"-s"+" "+"epel-6/"+" "+"epel-6.3")    		
+		os.system("ln"+" "+"-s"+" "+"epel-6/"+" "+"epel-6.4")    		
+		os.system("ln"+" "+"-s"+" "+"epel-6/"+" "+"epel-6.5")    		
+		os.system("ln"+" "+"-s"+" "+"epel-6/"+" "+"epel-6.6")    		
+	if k == "epel-7":
+		os.system("ln"+" "+"-s"+" "+"epel-7/"+" "+"epel-7Everything")    		
+		os.system("ln"+" "+"-s"+" "+"epel-7/"+" "+"epel-7Server")    		
+		os.system("ln"+" "+"-s"+" "+"epel-7/"+" "+"epel-7Workstation")    		
+		os.system("ln"+" "+"-s"+" "+"epel-7/"+" "+"epel-7ComputeNode")    		
+    print "Required links are created for epel dirs"
 def post_spread(where):
 
     """
@@ -90,7 +171,8 @@ def post_spread(where):
     """
 
     fedora_base = where+'/'+"Fedora"
-    epel_base = where+"/"+"EPEL"
+    epel_base = where+"/"+"EPEL.repo"
+
     if not os.path.exists(fedora_base):
         os.makedirs(fedora_base)
     if not os.path.exists(epel_base):
@@ -102,8 +184,10 @@ def post_spread(where):
             print "Fedora:%s" %(dirs)
             os.system("mv"+ " "+"fc*"+" "+fedora_base+" "+cmd)
         if "el" in dirs:
-            print "EPEL:%s" %(dirs)
+            print "EPEL.repo:%s" %(dirs)
             os.system("mv"+ " "+"el*"+" "+epel_base+" "+cmd)
+    
+    print "Directory sorting done"
     return True
 
 def tree_it (which_dir):
@@ -213,9 +297,17 @@ def main():
                       help="Spread fedora and EPEL rpms from specified directory to approprite arch and distro")
 
 
+    parser.add_option("-r", "--rearrange",
+                      action="store_true", dest="rearrange", default=False,
+                      help="Rearrange fedora and EPEL rpms from specified directory and sign rpms")
+    
+    parser.add_option("-l", "--link",
+                      action="store_true", dest="link", default=False,
+                      help=" Create links for epel5,6,7 directories.")
+
     options, arguments = parser.parse_args()
 
-    anyopt = [ options.pull , options.spread]
+    anyopt = [ options.pull , options.spread, options.rearrange, options.link]
     check = [o for o in anyopt if o]
     if not check:
         print  "You missed one of the must required option.. reread and execute.... exiting ."
@@ -234,6 +326,32 @@ def main():
         dest_spread_dir = raw_input("Enter the destination directory where the rpms are stored.:")
 
         spread_packages(source_spread_dir, dest_spread_dir)
+    if options.rearrange:
+	print "action:rearrange"
+	source_rearrange_dir = raw_input("Enter the directory full path to rearrange:")
+
+    	os.chdir(source_rearrange_dir)
+    	for dirs in os.listdir(source_rearrange_dir):
+		if dirs == "EPEL.repo":
+			source_rearrange_epeldir = source_rearrange_dir+'/'+'EPEL.repo'
+		if dirs == "Fedora":
+			source_rearrange_fedoradir = source_rearrange_dir+'/'+'Fedora'
+    	fedoradir=source_rearrange_fedoradir
+    	epeldir=source_rearrange_epeldir
+	rearrange_packages(fedoradir, epeldir)
+    if options.link:
+	print "action:link"
+	source_link_dir = raw_input("Enter the directory (where EPEL.repo and Fedora) full path : ")
+
+    	os.chdir(source_link_dir)
+    	for dirs in os.listdir(source_link_dir):
+		if dirs == "EPEL.repo":
+			source_link_epeldir = source_link_dir+'/'+'EPEL.repo'
+		if dirs == "Fedora":
+			source_link_fedoradir = source_link_dir+'/'+'Fedora'
+    	fedoradir=source_link_fedoradir
+    	epeldir=source_link_epeldir
+	link_creation(fedoradir, epeldir)
 
 
 if __name__ == '__main__':
