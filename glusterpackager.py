@@ -182,10 +182,10 @@ def post_spread(where):
         cmd = "--backup --suffix \"-`date +\"%F-%T\"`\""
         if "fc" in dirs:
             print "Fedora:%s" %(dirs)
-            os.system("mv"+ " "+"fc*"+" "+fedora_base+" "+cmd)
+            os.system("mv"+ " "+where+"/fc*"+" "+fedora_base+" "+cmd)
         if "el" in dirs:
             print "EPEL.repo:%s" %(dirs)
-            os.system("mv"+ " "+"el*"+" "+epel_base+" "+cmd)
+            os.system("mv"+ " "+where+"/el*"+" "+epel_base+" "+cmd)
     
     print "Directory sorting done"
     return True
@@ -263,25 +263,25 @@ def pull_packages(sourcedir):
     :return:
     """
     os.chdir(sourcedir)
-    task_id = raw_input ("Enter path for taskid (ex:7034519):")
+    task_ids = raw_input ("Enter path for taskid (ex:7034519):").split(",")
+    task_id_list = [str(int(x)-1) for x in task_ids]
+    print task_id_list
     count = int(raw_input("no of architectures:"))
-
-    for i in range(0,count):
-        parent_dir = task_id[-4:]
-        task_id_int=int(task_id)+1
-        parent_dir_int=int(parent_dir)+1
-        task_id= str(task_id_int)
-        parent_dir=str(parent_dir_int)
-        pullcmd = 'wget -e robots=off --cut-dirs=4 --user-agent=Mozilla/5.0 --reject="index.html*" --reject="*.log" ' \
-              '--no-parent --recursive --relative --level=1 --no-directories ' \
-              'https://kojipkgs.fedoraproject.org//work/tasks/'+parent_dir+'/'+task_id+'/'
-        ret = os.system(pullcmd)
-        if ret:
-
-            print "Error occurred.. please check and rerun if required"
-        else:
-            print " \t Successfully downloaded.. Verify downloaded RPMS"
-
+    for task_id in task_id_list:
+        for i in range(0,count):
+            parent_dir = task_id[-4:]
+            task_id_int=int(task_id)+1
+            parent_dir_int=int(parent_dir)+1
+            task_id= str(task_id_int)
+            parent_dir=str(parent_dir_int)
+            pullcmd = 'wget -e robots=off --cut-dirs=4 --user-agent=Mozilla/5.0 --reject="index.html*" --reject="*.log" ' \
+                  '--no-parent --recursive --relative --level=1 --no-directories ' \
+                  'https://kojipkgs.fedoraproject.org//work/tasks/'+parent_dir+'/'+task_id+'/'
+            ret = os.system(pullcmd)
+            if ret:
+                print "Error occurred.. please check and re-run if required"
+            else:
+                print " \t Successfully downloaded.. Verify downloaded RPMS"
 
 
 def main():
@@ -310,7 +310,7 @@ def main():
     anyopt = [ options.pull , options.spread, options.rearrange, options.link]
     check = [o for o in anyopt if o]
     if not check:
-        print  "You missed one of the must required option.. reread and execute.... exiting ."
+        print  "You missed one of the most required option.. re-read and execute.... exiting ."
         parser.print_help()
 
         sys.exit(1)
@@ -323,14 +323,13 @@ def main():
         print "action: spread"
         source_spread_dir = raw_input("Enter the source directory where the rpms are stored.:")
    
-        dest_spread_dir = raw_input("Enter the destination directory where the rpms are stored.:")
+        dest_spread_dir = raw_input("Enter the destination directory where the rpms should be spread.:")
 
         spread_packages(source_spread_dir, dest_spread_dir)
     if options.rearrange:
 	print "action:rearrange"
-	source_rearrange_dir = raw_input("Enter the directory full path to rearrange:")
-
-    	os.chdir(source_rearrange_dir)
+	source_rearrange_dir = raw_input("Enter the directory to rearrange:")
+        source_rearrange_dir = os.path.abspath(source_rearrange_dir)
     	for dirs in os.listdir(source_rearrange_dir):
 		if dirs == "EPEL.repo":
 			source_rearrange_epeldir = source_rearrange_dir+'/'+'EPEL.repo'
@@ -341,9 +340,8 @@ def main():
 	rearrange_packages(fedoradir, epeldir)
     if options.link:
 	print "action:link"
-	source_link_dir = raw_input("Enter the directory (where EPEL.repo and Fedora) full path : ")
-
-    	os.chdir(source_link_dir)
+	source_link_dir = raw_input("Enter the directory (where EPEL.repo and Fedora): ")
+        source_link_dir = os.path.abspath(source_link_dir)
     	for dirs in os.listdir(source_link_dir):
 		if dirs == "EPEL.repo":
 			source_link_epeldir = source_link_dir+'/'+'EPEL.repo'
