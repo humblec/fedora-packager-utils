@@ -353,7 +353,8 @@ def main():
                       help="Creates repodata for Fedora and EPEL")
 
     options, arguments = parser.parse_args()
-
+    fedoradir=''
+    epeldir=''
     anyopt = [ options.pull , options.spread, options.rearrange, options.link, options.repocreation]
     check = [o for o in anyopt if o]
     if not check:
@@ -384,6 +385,9 @@ def main():
 			epeldir = source_rearrange_dir+'/'+'EPEL.repo'
 		elif dirs == "Fedora":
 			fedoradir = source_rearrange_dir+'/'+'Fedora'
+	if fedoradir == '' or epeldir == '':
+                print "EPEL.repo or Fedora not found ... Exiting"
+                sys.exit(1)
         rearrange_packages(fedoradir, epeldir)
 
     if options.link:
@@ -395,6 +399,9 @@ def main():
 			epeldir = source_link_dir+'/'+'EPEL.repo'
 		elif dirs == "Fedora":
 			fedoradir = source_link_dir+'/'+'Fedora'
+	if fedoradir == '' or epeldir == '':
+                print "EPEL.repo or Fedora not found ... Exiting"
+                sys.exit(1)
 	link_creation(fedoradir, epeldir)
 
     if options.repocreation:
@@ -408,6 +415,9 @@ def main():
                         epeldir = source_repo_dir+'/'+'EPEL.repo'
                 elif dirs == "Fedora":
                         fedoradir = source_repo_dir+'/'+'Fedora'
+	if fedoradir == '' or epeldir == '':
+                print "EPEL.repo or Fedora not found ... Exiting"
+                sys.exit(1)
         repo_creation(epeldir,fedoradir)
 
 if __name__ == '__main__':
