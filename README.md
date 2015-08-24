@@ -13,7 +13,7 @@ Options:
                       and sign rpms
   -l, --link          Create links for epel5,6,7 directories.
   -c, --repocreation  Creates repodata for Fedora and EPEL
-
+  -a, --all           Runs all the commands 
 
 ```
 
