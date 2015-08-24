@@ -70,7 +70,9 @@ def verify_rpms(destdir, packages, pkgcount):
 
 def repo_creation(epeldir,fedoradir):
     build_list =["x86_64","i386","i686","noarch","armhfp","armv7hl","ppc","ppc64","SRPMS"]
-
+    os.system("cp /home/glusterpackager/glusterfs-epel.repo "+epeldir)
+    os.system("cp /home/glusterpackager/glusterfs-epel.repo.el5 "+epeldir)
+    os.system("cp /home/glusterpackager/glusterfs-fedora.repo "+fedoradir)
     for dirs in os.listdir(epeldir):
         if dirs == "epel-5":
                 epel5dirs=epeldir+"/"+dirs
