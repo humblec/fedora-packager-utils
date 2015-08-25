@@ -115,7 +115,7 @@ def repo_creation(fedoradir,epeldir):
                         orig_path=fdirs+'/'+fdir+'/*.rpm'
                         print "\n"+fdirs+'/'+fdir
                         print len(glob.glob(orig_path))
-
+    return True
 
 
 def list_rpms(sourcedir):
@@ -165,8 +165,8 @@ def rearrange_packages(source_rearrange_fedoradir, source_rearrange_epeldir):
 	if dirs == "fc23":
 		os.system("mv"+" "+"fc23"+" "+ "fedora-23")
 	if dirs == "fc24":
-		os.system("mv"+" "+"fc23"+" "+ "fedora-24")
-    print source_rearrange_fedoradir
+		os.system("mv"+" "+"fc24"+" "+ "fedora-24")
+	    print source_rearrange_fedoradir
     for i in fedora_dirs:
 	os.system("mv"+" "+i+"/src"+" "+i+"/SRPMS")
 
@@ -177,6 +177,7 @@ def rearrange_packages(source_rearrange_fedoradir, source_rearrange_epeldir):
     fedoradir=source_rearrange_fedoradir
     epeldir=source_rearrange_epeldir
     rpm_signing(fedoradir,epeldir)
+    return True
 
 def rpm_signing(fedoradir, epeldir):
     os.chdir(fedoradir)
@@ -212,6 +213,7 @@ def link_creation(fedoradir, epeldir):
 		os.system("ln"+" "+"-s"+" "+"epel-7/"+" "+"epel-7Workstation")
 		os.system("ln"+" "+"-s"+" "+"epel-7/"+" "+"epel-7ComputeNode")
     print "Required links are created for epel dirs"
+    return True
 
 def post_spread(where):
 
@@ -337,9 +339,9 @@ def pull_packages(sourcedir):
                 print " \t Successfully downloaded.. Verify downloaded RPMS"
     if fail != []:
         print fail
-        return 0
+        return False
     else:
-        return -1
+        return True
 
 def main():
 
@@ -446,14 +448,22 @@ def main():
 
     if options.runall:
         print "action:all"
+        ret = False
+        condi = ''
         source_all_dir=raw_input("Enter the directory to pull the packages:")
         dest_all_dir=raw_input("Enter the directory where the EPEL.repo and Fedora should be stored:")
         curr_dir = os.getcwd()
         print "action:pull"
-        pull_packages(source_all_dir)
+        ret = pull_packages(source_all_dir)
+        if not ret:
+                condi = raw_input("Enter 'y' to continue(anything to abort)")
+                if condi != 'y':
+                    sys.exit("Pull Packages Failed")
         print "\n action:pull *complete* \n\n action:spread"
         os.chdir(curr_dir)
-        spread_packages(source_all_dir,dest_all_dir)
+        ret = spread_packages(source_all_dir,dest_all_dir)
+        if not ret:
+                sys.exit("Spread Packages Failed")
         print "\n action:spread *complete* \n\n action:rearrange"
         source_all_dir = os.path.abspath(dest_all_dir)
     	for dirs in os.listdir(source_all_dir):
@@ -464,11 +474,17 @@ def main():
 	if fedoradir == '' or epeldir == '':
                 print "EPEL.repo or Fedora not found ... Exiting"
                 sys.exit(1)
-        rearrange_packages(fedoradir, epeldir)
+        ret = rearrange_packages(fedoradir, epeldir)
+        if not ret:
+                sys.exit("Rearrange Packages Failed")
         print "\n action:rearrange *complete* \n\n action:linking"
-        link_creation(fedoradir, epeldir)
+        ret = link_creation(fedoradir, epeldir)
+        if not ret:
+                sys.exit("Link Creation Failed")
         print "\n action:linking *complete* \n\n action:repo-creation"
-        repo_creation(fedoradir, epeldir)
+        ret = repo_creation(fedoradir, epeldir)
+        if not ret:
+                sys.exit("Repo creation Failed")
         print "\n action:repo creation *complete* \n\nALL ACTION COMPLETE"
         os.chdir(curr_dir)
         os.mkdir(source_all_dir+"/CentOS")
